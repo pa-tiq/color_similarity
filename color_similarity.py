@@ -36,20 +36,29 @@ def onclick(event):
         ):
             global selected
             global css4colors
+            global fig
+            global ax
             selected = key
-            print(selected)
-            plt.close()
             plot_colors(
                 colors=css4colors,
                 primaryHex=css4colors[selected],
                 precision=4,
                 considerLAB=False,
+                fig=fig,
+                ax=ax,
             )
-            plt.show()
 
 
 def plot_colors(
-    colors, *, ncols=4, sort_colors=True, primaryHex, precision, considerLAB
+    colors,
+    *,
+    ncols=4,
+    sort_colors=True,
+    primaryHex,
+    precision,
+    considerLAB,
+    fig=None,
+    ax=None,
 ):
     cell_width = 320
     cell_height = 22
@@ -71,60 +80,63 @@ def plot_colors(
     height = cell_height * nrows + 2 * margin
     dpi = 72
 
-    fig, ax = plt.subplots(figsize=(width / dpi, height / dpi), dpi=dpi)
-    fig.subplots_adjust(
-        margin / width,
-        margin / height,
-        (width - margin) / width,
-        (height - margin) / height,
-    )
-    ax.set_xlim(0, cell_width * 4)
-    ax.set_ylim(cell_height * (nrows - 0.5), -cell_height / 2.0)
-    ax.yaxis.set_visible(False)
-    ax.xaxis.set_visible(False)
-    ax.set_axis_off()
-    cid = fig.canvas.mpl_connect("button_press_event", onclick)
-
-    for i, name in enumerate(names):
-        row = i % nrows
-        col = i // nrows
-        y = row * cell_height
-
-        swatch_start_x = cell_width * col
-        text_pos_x = cell_width * col + swatch_width + 7
-
-        # rgb_tuple = mcolors.to_rgb(name)
-        # rgb_255 = []
-        # for rgb_value in rgb_tuple:
-        #    rgb_255.append(int(rgb_value * 255))
-
-        deltae = delta_e_str(colors[name], primaryHex, considerLAB=considerLAB)
-
-        ax.text(
-            text_pos_x,
-            y,
-            # name + " " + str(rgb_255),
-            name + " " + deltae,
-            # name,
-            fontsize=18 if selected == name else 14,
-            horizontalalignment="left",
-            verticalalignment="center",
-            fontweight="extra bold" if selected == name else "normal",
-        )
-
-        ax.add_patch(
-            Rectangle(
-                xy=(swatch_start_x, y - 9),
-                width=swatch_width,
-                height=18,
-                facecolor=colors[name] if float(deltae) < precision else "#FFFFFF",
-                edgecolor="0.7",
+    with plt.ion():
+        if fig and ax:
+            ax.clear()
+        else:
+            fig, ax = plt.subplots(figsize=(width / dpi, height / dpi), dpi=dpi)
+            fig.subplots_adjust(
+                margin / width,
+                margin / height,
+                (width - margin) / width,
+                (height - margin) / height,
             )
-        )
+        ax.set_xlim(0, cell_width * 4)
+        ax.set_ylim(cell_height * (nrows - 0.5), -cell_height / 2.0)
+        ax.yaxis.set_visible(False)
+        ax.xaxis.set_visible(False)
+        ax.set_axis_off()
+        cid = fig.canvas.mpl_connect("button_press_event", onclick)
+        for i, name in enumerate(names):
+            row = i % nrows
+            col = i // nrows
+            y = row * cell_height
 
-        color_positions[name] = (swatch_start_x, y - 9)
+            swatch_start_x = cell_width * col
+            text_pos_x = cell_width * col + swatch_width + 7
 
-    return fig
+            # rgb_tuple = mcolors.to_rgb(name)
+            # rgb_255 = []
+            # for rgb_value in rgb_tuple:
+            #    rgb_255.append(int(rgb_value * 255))
+
+            deltae = delta_e_str(colors[name], primaryHex, considerLAB=considerLAB)
+
+            ax.text(
+                text_pos_x,
+                y,
+                # name + " " + str(rgb_255),
+                name + " " + deltae,
+                # name,
+                fontsize=18 if selected == name else 14,
+                horizontalalignment="left",
+                verticalalignment="center",
+                fontweight="extra bold" if selected == name else "normal",
+            )
+
+            ax.add_patch(
+                Rectangle(
+                    xy=(swatch_start_x, y - 9),
+                    width=swatch_width,
+                    height=18,
+                    facecolor=colors[name] if float(deltae) < precision else "#FFFFFF",
+                    edgecolor="0.7",
+                )
+            )
+
+            color_positions[name] = (swatch_start_x, y - 9)
+
+    return fig, ax
 
 
 def delta_e_str(hex1, hex2, considerLAB=True):
@@ -150,20 +162,20 @@ green = sRGBColor(0, 255, 0, is_upscaled=True)
 yellow = sRGBColor(255, 255, 0, is_upscaled=True)
 brown = sRGBColor(165, 42, 42, is_upscaled=True)
 orange = sRGBColor(255, 160, 0, is_upscaled=True)
-gray = sRGBColor(128, 128, 128, is_upscaled=True)
+grey = sRGBColor(128, 128, 128, is_upscaled=True)
 
 # green: precision = 21 sem considerar LAB
 # deepskyblue: precision = 23 sem considerar LAB
 # gray: precision = 4 sem considerar LAB
 
 css4colors = mcolors.CSS4_COLORS
-primary_rbg_hex = gray.get_rgb_hex()
-css4colors["gray"] = primary_rbg_hex
+primary_rbg_hex = grey.get_rgb_hex()
+css4colors["grey"] = primary_rbg_hex
 
 color_positions = {}
-selected = "gray"
+selected = "grey"
 
-plot_colors(
+fig, ax = plot_colors(
     colors=css4colors, primaryHex=primary_rbg_hex, precision=20, considerLAB=False
 )
 plt.show()
