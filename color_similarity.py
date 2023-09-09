@@ -130,13 +130,14 @@ def plot_colors(
         # button.on_clicked(apply_slider_value)
 
         ax_precision = fig.add_axes([0.10, 0.03, 0.65, 0.03])
+        ax_precision.clear()
         precision_slider = Slider(
             ax=ax_precision,
             label="Precisão",
             valmin=1,
             valmax=60,
             valinit=precision[selected],
-            valstep=1,
+            valstep=0.5,
         )
 
         def update_precision_slider(val):
